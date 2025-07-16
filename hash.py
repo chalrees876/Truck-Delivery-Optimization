@@ -16,6 +16,8 @@ class HashTable(object):
         index = package_id % self.size
         for package in self.data[index]:
             if package_id == int(package.package_id):
-                package.print_info()
+                return package
+
+
     def remove(self, key):
         pass
