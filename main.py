@@ -20,40 +20,50 @@ def main():
 
     distance_table = get_distances("Resources/distances.csv")
 
-    truck1 = Truck()
+    truck1 = Truck(1)
 
-    for package in hashtable.data[0]:
-        truck1.add_package(package)
+    for i in range(hashtable.size):
+        for package in hashtable.data[i]:
+            if package not in truck1.packages_loaded:
+                truck1.add_package(package)
 
     truck1_packages = truck1.packages_loaded
-    truck1_table = distance_table
-
-
-    #creates a distance table specific to packages on truck
     truck1_table = make_truck_table(truck1_packages, distance_table)
 
-    first_stop = truck1_packages[0].address
+    first_stop_distance = float(distance_from_hub(truck1_table, hashtable.get(4).address))
 
-    print(truck1.calculate_time(37, "8:11 AM"))
-
-
-
+    truck1.deliver_package(hashtable.get(4), first_stop_distance)
+    hashtable.get(4).print_info()
 
 
+    for i in range(40):
+        package_delivered = False
+        closest_neighbor_address = closest_neighbor(truck1.current_location, truck1_table)
 
+        print(closest_neighbor_address)
+
+        for package in truck1.packages_loaded:
+            if package.address.strip().lower() in closest_neighbor_address.strip().lower():
+                print("Package found", package.package_id)
+                next_distance = find_address_distances(truck1.current_location, package.address, truck1_table)
+                truck1.deliver_package(package, next_distance)
+                package.print_info()
+                package_delivered = True
+        if package_delivered is False:
+            find_address_distances(truck1.current_location, closest_neighbor_address, truck1_table)
 
 def make_truck_table(packages, distance_table):
-    keep_columns = [0]
+    keep_columns = {0}
     for column_index, column in enumerate(distance_table[7]):
         for package in packages:
             if package.address in column:
-                keep_columns.append(column_index)
+                keep_columns.add(column_index)
 
-    keep_rows = [7]
+    keep_rows = {7}
     for row_index, row in enumerate(distance_table):
         for package in packages:
             if package.address in row[0]:
-                keep_rows.append(row_index)
+                keep_rows.add(row_index)
 
 
     truck_table = []
@@ -69,14 +79,43 @@ def make_truck_table(packages, distance_table):
 def find_address_distances(address1, address2, distance_table):
     address1_row = -1
     address2_col = -1
-    for row_index, row in enumerate(distance_table):
-        if address1 in row[0]:
+
+    # Find row index for address1
+    for row_index, row in enumerate(distance_table[1:], start=1):  # skip header row
+        if address1.strip().lower() in row[0].strip().lower():
             address1_row = row_index
-    for col_index, col in enumerate(distance_table[0]):
-        if address2 in col:
+            break
+
+    # Find column index for address2
+    for col_index, col in enumerate(distance_table[0][2:], start=2):  # skip first two columns
+        if address2.strip().lower() in col.strip().lower():
             address2_col = col_index
-    if address1_row >=0 and address2_col >=0:
-        return distance_table[address1_row][address2_col]
+            break
+
+    if address1_row == -1 or address2_col == -1:
+        print(f"Could not find row/column for addresses: '{address1}' or '{address2}'")
+        return "Error"
+
+    # Try normal direction
+    try:
+        val = distance_table[address1_row][address2_col]
+        if val.strip() != "":
+            distance = float(val.strip())
+            distance_table[address1_row][address2_col] = "100"
+            return distance
+    except:
+        pass
+
+    # Try symmetric direction
+    try:
+        val = distance_table[address2_col - 1 + 1][address1_row + 1]
+        if val.strip() != "":
+            distance = float(val.strip())
+            distance_table[address2_col - 1 + 1][address1_row + 1] = "100"
+            return distance
+    except:
+        pass
+
     return "Error"
 
 
@@ -85,26 +124,31 @@ def distance_from_hub(distance_table, address):
     for row in distance_table:
         if address in row[0]:
             distance = row[3]
-            return distance
+            return float(distance)
 
 def closest_neighbor(address, distance_table):
-    row_index = 0
+    row_index = None
     min_distance_row = 100
     min_distance_column = 100
     #determine what row address is in
-    for row in distance_table:
+    for i, row in enumerate(distance_table):
         if address in row[0]:
+            row_index = i
             break
-        row_index += 1
-    print("Row index:", row_index)
-    print("address:", address)
+    if row_index is None:
+        print("Address not found", address)
+        print("looking in ")
+        return None
 
     #determine what column address is in
-    column_index = 0
-    for item in distance_table[0]:
+    column_index = None
+    for i, item in enumerate(distance_table[0]):
         if address.strip() in item.strip():
+            column_index = i
             break
-        column_index += 1
+    if column_index is None:
+        print("column index not found for this address", address)
+        return None
 
     min_distance_row_index = 0
     min_distance_column_index = 0
@@ -129,13 +173,12 @@ def closest_neighbor(address, distance_table):
 
 
 def get_distances(distance_file):
-
     distance_table = []
-
     with open(distance_file, mode='r') as file:
         for row in csv.reader(file):
-            distance_table.append(row)
-
+            # Strip leading/trailing spaces and remove newlines
+            cleaned_row = [cell.strip().replace('\n', ' ') for cell in row]
+            distance_table.append(cleaned_row)
     return distance_table
 
 
