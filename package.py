@@ -14,7 +14,7 @@ class Package:
         self.delivered_with = []
 
     def deliver(self):
-        self.delivered = True
+        self.status = "Delivered"
 
     def print_info(self):
         print("---------------"

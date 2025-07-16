@@ -19,40 +19,113 @@ def main():
     hashtable = hash_packages("Resources/packages.csv")
 
     distance_table = get_distances("Resources/distances.csv")
-    print(distance_table)
 
     truck1 = Truck()
 
     for package in hashtable.data[0]:
         truck1.add_package(package)
 
-    truck_address_table = make_truck_address_table(truck1)
-
     truck1_packages = truck1.packages_loaded
-
-    closest_neighbor(truck_address_table, distance_table)
-
+    truck1_table = distance_table
 
 
+    #creates a distance table specific to packages on truck
+    truck1_table = make_truck_table(truck1_packages, distance_table)
+
+    first_stop = truck1_packages[0].address
+
+    print(truck1.calculate_time(37, "8:11 AM"))
 
 
-#make a list of all addresses truck needs to visit
-def make_truck_address_table(truck):
-    truck_address_table = []
-    for package in truck.packages_loaded:
-        truck_address_table.append(package.address)
-    return truck_address_table
 
 
-def closest_neighbor(truck_address_table, distance_table):
-    current_closest_neighbor = distance_table[0]
-    for address in truck_address_table:
-        for row in distance_table:
-            if address in row[0]:
-                for line in row:
-                    #print(line)
-                    pass
 
+
+
+def make_truck_table(packages, distance_table):
+    keep_columns = [0]
+    for column_index, column in enumerate(distance_table[7]):
+        for package in packages:
+            if package.address in column:
+                keep_columns.append(column_index)
+
+    keep_rows = [7]
+    for row_index, row in enumerate(distance_table):
+        for package in packages:
+            if package.address in row[0]:
+                keep_rows.append(row_index)
+
+
+    truck_table = []
+    for row_index in keep_rows:
+        row = distance_table[row_index]
+        truck_table_row = [row[column_index] for column_index in keep_columns]
+        truck_table.append(truck_table_row)
+
+    return truck_table
+
+
+
+def find_address_distances(address1, address2, distance_table):
+    address1_row = -1
+    address2_col = -1
+    for row_index, row in enumerate(distance_table):
+        if address1 in row[0]:
+            address1_row = row_index
+    for col_index, col in enumerate(distance_table[0]):
+        if address2 in col:
+            address2_col = col_index
+    if address1_row >=0 and address2_col >=0:
+        return distance_table[address1_row][address2_col]
+    return "Error"
+
+
+
+def distance_from_hub(distance_table, address):
+    for row in distance_table:
+        if address in row[0]:
+            distance = row[3]
+            return distance
+
+def closest_neighbor(address, distance_table):
+    row_index = 0
+    min_distance_row = 100
+    min_distance_column = 100
+    #determine what row address is in
+    for row in distance_table:
+        if address in row[0]:
+            break
+        row_index += 1
+    print("Row index:", row_index)
+    print("address:", address)
+
+    #determine what column address is in
+    column_index = 0
+    for item in distance_table[0]:
+        if address.strip() in item.strip():
+            break
+        column_index += 1
+
+    min_distance_row_index = 0
+    min_distance_column_index = 0
+    for index, item in enumerate(distance_table[row_index]):
+        if len(item) == 3 or len(item) == 4:
+            if min_distance_column > float(item) > 0:
+                min_distance_column = float(item)
+                min_distance_column_index = index
+
+    for index, item in enumerate(distance_table):
+        if len(item[column_index]) == 3 or len(item[column_index]) == 4:
+            if min_distance_row > float(item[column_index]) > 0:
+                min_distance_row = float(item[column_index])
+                min_distance_row_index = index
+
+    if min_distance_row < min_distance_column:
+        closest_neighbor_address = distance_table[min_distance_row_index][0]
+    else:
+        closest_neighbor_address = distance_table[0][min_distance_column_index]
+
+    return closest_neighbor_address
 
 
 def get_distances(distance_file):
