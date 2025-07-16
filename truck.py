@@ -9,11 +9,13 @@ class Truck:
     def add_package(self, package):
         self.packages_loaded.append(package)
         self.weight += package.weight_kg
+        package.status = "In Route"
 
     def deliver_package(self, package):
         self.packages_loaded.remove(package)
         self.current_location = package.address
         self.weight -= package.weight_kg
+        package.statue = "Delivered"
 
 
 

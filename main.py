@@ -19,55 +19,39 @@ def main():
     hashtable = hash_packages("Resources/packages.csv")
 
     distance_table = get_distances("Resources/distances.csv")
+    print(distance_table)
 
     truck1 = Truck()
 
     for package in hashtable.data[0]:
         truck1.add_package(package)
 
-    truck_distance_table(truck1, distance_table)
-
-    for package in truck1.packages_loaded:
-        package.print_info()
+    truck_address_table = make_truck_address_table(truck1)
 
     truck1_packages = truck1.packages_loaded
 
-    truck1.deliver_package(truck1_packages[0])
-
-    print(truck1_packages)
-    print(truck1.current_location)
-    print(truck1.miles_driven)
-
-
-    closest_neighbor(hashtable.get(13).address, distance_table)
+    closest_neighbor(truck_address_table, distance_table)
 
 
 
 
 
-def truck_distance_table(truck, distance_table):
-    truck_table = []
+#make a list of all addresses truck needs to visit
+def make_truck_address_table(truck):
+    truck_address_table = []
     for package in truck.packages_loaded:
+        truck_address_table.append(package.address)
+    return truck_address_table
+
+
+def closest_neighbor(truck_address_table, distance_table):
+    current_closest_neighbor = distance_table[0]
+    for address in truck_address_table:
         for row in distance_table:
-            if package.address in row[0]:
-                print(package.address)
-                print("PACKAGE ADDRESS IN row[0]", row[1])
-
-
-
-
-
-def closest_neighbor(address, distance_table):
-    row_index = 0
-    column_index = 0
-    for row in distance_table:
-        if address not in row[1]:
-            row_index += 1
-        else:
-            break
-    address_row = distance_table[row_index]
-    for row in distance_table:
-        pass
+            if address in row[0]:
+                for line in row:
+                    #print(line)
+                    pass
 
 
 
