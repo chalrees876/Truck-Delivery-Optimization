@@ -8,17 +8,13 @@
 import csv
 import re
 
-from Package import Package
+from package import Package
 from hash import HashTable
 
 def main():
 
     #Call function to add all packages in csv into hash table.
     hashtable = hash_packages("Resources/packages.csv")
-
-    hashtable.get(3)
-    hashtable.get(6)
-    hashtable.get(14)
 
 
 def hash_packages(packages_file):
@@ -28,8 +24,11 @@ def hash_packages(packages_file):
 
     with open(packages_file, mode='r') as file:
         for row in csv.reader(file):
-            """Create packages for each row in the csv file."""
+
+            #Create packages for each row in the csv file.
             package = Package(int(row[0]), row[1], row[2], row[3], row[4], row[5], row[6])
+
+            #Take care of edge cases
             if row[7] == "Can only be on truck 2":
                 package.truck = 2
 
