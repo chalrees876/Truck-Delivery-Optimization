@@ -29,12 +29,23 @@ def main():
 
     truck1_table = make_truck_table(truck1.packages_loaded, distance_table)
 
-    first_stop_distance = float(distance_from_hub(truck1_table, hashtable.get(4).address))
+    first_stop_distance = distance_from_hub(truck1_table, hashtable.get(4).address)
 
     truck1.deliver_package(hashtable.get(4), first_stop_distance)
     hashtable.get(4).print_info()
 
-    get_neighbors_sorted_by_distance(truck1.current_location, truck1_table)
+    for i in range(40):
+        neighbors = get_neighbors_sorted_by_distance(truck1.current_location, truck1_table)
+        found_package = False
+        for neighbor in neighbors:
+            for package in truck1.packages_loaded:
+                if package.address in neighbor[0]:
+                    found_package = True
+                    truck1.deliver_package(package, neighbor[1])
+                    package.print_info()
+                    print("truck current Location: ", truck1.current_location)
+            if found_package is True:
+                break
 
 def make_truck_table(packages, distance_table):
     keep_columns = {0}
@@ -57,51 +68,6 @@ def make_truck_table(packages, distance_table):
         truck_table.append(truck_table_row)
 
     return truck_table
-
-
-
-def find_address_distances(address1, address2, distance_table):
-    address1_row = -1
-    address2_col = -1
-
-    # Find row index for address1
-    for row_index, row in enumerate(distance_table):  # skip header row
-        if address1.strip().lower() in row[0].strip().lower():
-            print("found address1")
-            address1_row = row_index
-            break
-
-    # Find column index for address2
-    for col_index, col in enumerate(distance_table[7]):  # skip first two columns
-        if address2.strip().lower() in col.strip().lower():
-            print("found address2")
-            address2_col = col_index
-            break
-
-    if address1_row == -1 or address2_col == -1:
-        print(f"Could not find row/column for addresses: '{address1}' or '{address2}'")
-        return "Error"
-
-    # Try normal direction
-    try:
-        val = distance_table[address1_row][address2_col]
-        if val.strip() != "":
-            distance = float(val.strip())
-            return distance
-    except:
-        pass
-
-    # Try symmetric direction
-    try:
-        val = distance_table[address2_col - 1 + 1][address1_row + 1]
-        if val.strip() != "":
-            distance = float(val.strip())
-            return distance
-    except:
-        pass
-
-    return "Error"
-
 
 
 def distance_from_hub(distance_table, address):
