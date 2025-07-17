@@ -27,30 +27,14 @@ def main():
             if package not in truck1.packages_loaded:
                 truck1.add_package(package)
 
-    truck1_packages = truck1.packages_loaded
-    truck1_table = make_truck_table(truck1_packages, distance_table)
+    truck1_table = make_truck_table(truck1.packages_loaded, distance_table)
 
     first_stop_distance = float(distance_from_hub(truck1_table, hashtable.get(4).address))
 
     truck1.deliver_package(hashtable.get(4), first_stop_distance)
     hashtable.get(4).print_info()
 
-
-    for i in range(40):
-        package_delivered = False
-        closest_neighbor_address = closest_neighbor(truck1.current_location, truck1_table)
-
-        print(closest_neighbor_address)
-
-        for package in truck1.packages_loaded:
-            if package.address.strip().lower() in closest_neighbor_address.strip().lower():
-                print("Package found", package.package_id)
-                next_distance = find_address_distances(truck1.current_location, package.address, truck1_table)
-                truck1.deliver_package(package, next_distance)
-                package.print_info()
-                package_delivered = True
-        if package_delivered is False:
-            find_address_distances(truck1.current_location, closest_neighbor_address, truck1_table)
+    get_neighbors_sorted_by_distance(truck1.current_location, truck1_table)
 
 def make_truck_table(packages, distance_table):
     keep_columns = {0}
@@ -81,14 +65,16 @@ def find_address_distances(address1, address2, distance_table):
     address2_col = -1
 
     # Find row index for address1
-    for row_index, row in enumerate(distance_table[1:], start=1):  # skip header row
+    for row_index, row in enumerate(distance_table):  # skip header row
         if address1.strip().lower() in row[0].strip().lower():
+            print("found address1")
             address1_row = row_index
             break
 
     # Find column index for address2
-    for col_index, col in enumerate(distance_table[0][2:], start=2):  # skip first two columns
+    for col_index, col in enumerate(distance_table[7]):  # skip first two columns
         if address2.strip().lower() in col.strip().lower():
+            print("found address2")
             address2_col = col_index
             break
 
@@ -101,7 +87,6 @@ def find_address_distances(address1, address2, distance_table):
         val = distance_table[address1_row][address2_col]
         if val.strip() != "":
             distance = float(val.strip())
-            distance_table[address1_row][address2_col] = "100"
             return distance
     except:
         pass
@@ -111,7 +96,6 @@ def find_address_distances(address1, address2, distance_table):
         val = distance_table[address2_col - 1 + 1][address1_row + 1]
         if val.strip() != "":
             distance = float(val.strip())
-            distance_table[address2_col - 1 + 1][address1_row + 1] = "100"
             return distance
     except:
         pass
@@ -126,50 +110,45 @@ def distance_from_hub(distance_table, address):
             distance = row[3]
             return float(distance)
 
-def closest_neighbor(address, distance_table):
-    row_index = None
-    min_distance_row = 100
-    min_distance_column = 100
-    #determine what row address is in
+def get_neighbors_sorted_by_distance(address, distance_table):
+    neighbors = []
+
+    # Get the row and column indices for the address
+    row_idx = None
+    col_idx = None
+
     for i, row in enumerate(distance_table):
-        if address in row[0]:
-            row_index = i
+        if address.strip().lower() in row[0].lower():
+            row_idx = i
             break
-    if row_index is None:
-        print("Address not found", address)
-        print("looking in ")
-        return None
-
-    #determine what column address is in
-    column_index = None
     for i, item in enumerate(distance_table[0]):
-        if address.strip() in item.strip():
-            column_index = i
+        if address.strip().lower() in item.lower():
+            col_idx = i
             break
-    if column_index is None:
-        print("column index not found for this address", address)
-        return None
 
-    min_distance_row_index = 0
-    min_distance_column_index = 0
-    for index, item in enumerate(distance_table[row_index]):
-        if len(item) == 3 or len(item) == 4:
-            if min_distance_column > float(item) > 0:
-                min_distance_column = float(item)
-                min_distance_column_index = index
+    if row_idx is None or col_idx is None:
+        return []
 
-    for index, item in enumerate(distance_table):
-        if len(item[column_index]) == 3 or len(item[column_index]) == 4:
-            if min_distance_row > float(item[column_index]) > 0:
-                min_distance_row = float(item[column_index])
-                min_distance_row_index = index
+    # Collect distances to all other addresses
+    for idx, row in enumerate(distance_table):
+        try:
+            dist = float(row[col_idx])
+            if dist > 0:
+                neighbors.append((distance_table[idx][0], dist))
+        except:
+            continue
+    for idx, col in enumerate(distance_table[row_idx]):
+        try:
+            dist = float(col)
+            if dist > 0:
+                neighbors.append((distance_table[idx][0], dist))
+        except:
+            continue
 
-    if min_distance_row < min_distance_column:
-        closest_neighbor_address = distance_table[min_distance_row_index][0]
-    else:
-        closest_neighbor_address = distance_table[0][min_distance_column_index]
+    # Sort by distance
+    neighbors.sort(key=lambda x: x[1])
+    return neighbors
 
-    return closest_neighbor_address
 
 
 def get_distances(distance_file):
