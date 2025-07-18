@@ -13,6 +13,7 @@ class Package:
         self.incorrect_address = False
         self.delivered_with = []
         self.time_delivered = ""
+        self.loaded_time = ""
 
     def deliver(self):
         self.status = "Delivered"
@@ -28,8 +29,12 @@ class Package:
         print("Weight", self.weight_kg)
         print("Status", self.status)
         print("Truck", self.truck)
-        if self.status is "Delivered":
+        if self.status == "Delivered":
             print("Time delivered:", self.time_delivered)
+        if self.delayed_time:
+            print("Delayed Time:", self.delayed_time)
+        print("Delivered with:", self.delivered_with)
+        print("Time Picked Up:", self.loaded_time)
 
 
 

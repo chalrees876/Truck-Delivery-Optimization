@@ -10,6 +10,7 @@ class Truck:
         self.current_time = "8:00 AM"
         self.speed = 18
         self.number = number
+        self.delivery_log = []
 
 
 
@@ -18,6 +19,7 @@ class Truck:
         self.weight += package.weight_kg
         package.status = "In Route"
         package.truck = self.number
+        package.loaded_time = self.current_time
 
     def deliver_package(self, package, distance):
         self.packages_loaded.remove(package)
@@ -27,6 +29,14 @@ class Truck:
         package.status = "Delivered"
         self.current_time = self.calculate_time(distance, self.current_time)
         package.time_delivered = self.current_time
+        self.delivery_log.append((self.current_time, distance))
+
+    def drive_to_hub(self, distance):
+        if self.current_location == "HUB":
+            return
+        self.current_location = "HUB"
+        self.miles_driven += distance
+        self.current_time = self.calculate_time(distance, self.current_time)
 
     def calculate_time(self, miles_driven, current_time):
         # Parse current time
