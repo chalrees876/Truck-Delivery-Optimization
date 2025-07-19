@@ -1,6 +1,6 @@
 # Truck Delivery Optimization
 
-A Python-based package delivery routing system designed for the Western Governors University Parcel Service (WGUPS). This program uses a greedy nearest-neighbor algorithm and custom hash table to optimize delivery efficiency, minimize mileage, and meet time-sensitive delivery constraints.
+A Python-based package delivery routing system. This program uses a greedy nearest-neighbor algorithm and custom hash table to optimize delivery efficiency, minimize mileage, and meet time-sensitive delivery constraints.
 
 
 ## Features
