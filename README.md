@@ -26,14 +26,17 @@ A Python-based package delivery routing system. This program uses a greedy neare
 ---
 
 ## Project Structure
-.
-├── main.py # Main execution logic and simulation
-├── truck.py # Truck class for delivery simulation
-├── package.py # Package class with delivery metadata
-├── hash.py # Custom HashTable implementation
-├── Resources/
-│ ├── distances.csv # Symmetric distance matrix between delivery addresses
-│ └── packages.csv # Package delivery metadata
+
+.  
+
+|-- main.py          # Main execution logic and simulation  
+|-- truck.py         # Truck class for delivery simulation  
+|-- package.py       # Package class with delivery metadata  
+|-- hash.py          # Custom HashTable implementation  
+|-- Resources/  
+|   |-- distances.csv  # Symmetric distance matrix between delivery addresses  
+│   |-- packages.csv   # Package delivery metadata  
+
 
 ## How It Works
 
