@@ -25,6 +25,9 @@ def main():
     truck1 = Truck(1)
     truck2 = Truck(2)
 
+    #Need to add package 29 to truck 1 so that it will deliver on time
+    truck1.add_package(hashtable.get(29))
+
     #loop until all packages have been delivered
     while any(
             package.status != "Delivered"
@@ -35,22 +38,10 @@ def main():
         #load packages onto truck 1
         load_packages(truck1, hashtable)
 
-
-        # load and deliver package 37
-        # I do this because initially it gets placed onto truck 1
-        # and in my current algorithm it delivers package 37 last
-        # this makes package 37 miss its deadline
-        # i only want to do this inside the loop if package 37 is not delivered
-        package37 = hashtable.get(37)
-        if package37.status != "Delivered":
-            package37_distance_from_hub = distance_from_hub(distance_table, package37.address)
-            truck2.add_package(package37)
-            truck2.deliver_package(package37, package37_distance_from_hub)
-            truck2.drive_to_hub(package37_distance_from_hub)
-
-            # I want to set truck 2 current time to 9:06 am so it can pick up all the delayed packages
-            if convert_string_time_to_int(truck2.current_time) < convert_string_time_to_int("9:06 AM"):
-                truck2.current_time = "9:06 AM"
+        truck2.current_time = "9:06 AM"
+        #need to add packages 6 and 37 to truck 2 so they will deliver on time
+        truck2.add_package(hashtable.get(6))
+        truck2.add_package(hashtable.get(37))
         load_packages(truck2, hashtable)
 
         # algorithm finds the package with the earliest deadline and delivers that package first
@@ -69,14 +60,14 @@ def main():
         if package_id_input == "all":
             for i in range(hashtable.size):
                 for package in hashtable.data[i]:
-                    get_package_info_at_time(package, time)
+                    package.print_info_at_time(time)
             break
         elif package_id_input.isdigit():
             try:
                 package_id = int(package_id_input)
             except:
                 break
-            get_package_info_at_time(hashtable.get(package_id), time)
+            hashtable.get(package_id).print_info_at_time(time)
             break
         else:
             print("Unknown Command")
@@ -107,7 +98,7 @@ def get_package_info_at_time(package, time):
     package_delivered_time = convert_string_time_to_int(package.time_delivered)
     package_loaded_time = convert_string_time_to_int(package.loaded_time)
     if current_time >= package_delivered_time:
-        print("Package", package.package_id, "was delivered at", package.time_delivered)
+        package.print_info()
         return
     if package_delivered_time > current_time >= package_loaded_time:
         print("Package", package.package_id, "was loaded on to truck", package.truck, "at", package.loaded_time, "and is en route")
@@ -124,6 +115,11 @@ def deliver_first_package(truck, distance_table, hashtable):
         if convert_string_time_to_int(package.deadline) < earliest_deadline:
             earliest_deadline = convert_string_time_to_int(package.deadline)
             earliest_deadline_idx = idx
+        """if package.package_id == "25":
+            package = hashtable.get(25)
+            package_distance_from_hub = distance_from_hub(distance_table, package.address)
+            truck.deliver_package(package, package_distance_from_hub)
+            return"""
     package = truck.packages_loaded[earliest_deadline_idx]
     package_distance_from_hub = distance_from_hub(distance_table, package.address)
 
@@ -167,7 +163,6 @@ def load_packages(truck, hashtable):
                 for nested_package in hashtable.data[j]:
                     if (
                     len(truck.packages_loaded) < 16
-                    and nested_package.zipcode == current_zip
                     and nested_package.status == "In hub"
                     and convert_string_time_to_int(nested_package.delayed_time) <= convert_string_time_to_int(truck.current_time)
                     and (nested_package.truck is None or nested_package.truck == truck.number)

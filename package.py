@@ -1,3 +1,25 @@
+import re
+
+
+def convert_string_time_to_int(time):
+    if time is None:
+        return 0
+    match = re.match(r"^(\d{1,2}):(\d{2}) (AM|PM)$", time.strip())
+    if not match:
+        raise ValueError(f"Invalid time format: {time}")
+
+    hour = int(match.group(1))
+    minute = int(match.group(2))
+    period = match.group(3)
+
+    # Convert to minutes since midnight
+    total_minutes = hour % 12 * 60 + minute
+    if period == "PM":
+        total_minutes += 12 * 60
+
+    return total_minutes
+
+
 class Package:
     def __init__(self, package_id, address, city, state, zipcode, deadline, weight_kg):
         self.weight_kg = weight_kg
@@ -22,19 +44,64 @@ class Package:
         print("---------------"
               "Package Id", self.package_id, "Info"
                 "------------------")
-        print("Address", self.address)
-        print("City", self.city)
-        print("Zipcode", self.zipcode)
-        print("Deadline", self.deadline)
-        print("Weight", self.weight_kg)
-        print("Status", self.status)
-        print("Truck", self.truck)
-        if self.status == "Delivered":
-            print("Time delivered:", self.time_delivered)
+        print("Address", self.address, end=" | ")
+        print("City", self.city, end=" | ")
+        print("Zipcode", self.zipcode, end=" | ")
+        print("Weight", self.weight_kg, end=" | ")
+        print("Truck", self.truck, end=" | ")
+        print("Status", self.status, end=" | ")
+        print("Time Picked Up:", self.loaded_time, end=" | ")
         if self.delayed_time:
-            print("Delayed Time:", self.delayed_time)
-        print("Delivered with:", self.delivered_with)
-        print("Time Picked Up:", self.loaded_time)
+            print("Delayed Time:", self.delayed_time, end=" | ")
+        print("Deadline", self.deadline, end=" | ")
+        if self.status == "Delivered":
+            print("Time delivered:", self.time_delivered, end=" | ")
+        print("")
+
+
+
+
+
+    def print_info_at_time(self, time):
+        current_time = convert_string_time_to_int(time)
+        package_delivered_time = convert_string_time_to_int(self.time_delivered)
+        package_loaded_time = convert_string_time_to_int(self.loaded_time)
+        if current_time >= package_delivered_time:
+            self.print_info()
+            return
+        if package_delivered_time > current_time >= package_loaded_time:
+            print("---------------"
+                      "Package Id", self.package_id, "Info"
+                                                 "------------------")
+            print("Address", self.address, end=" | ")
+            print("City", self.city, end=" | ")
+            print("Zipcode", self.zipcode, end=" | ")
+            print("Weight", self.weight_kg, end=" | ")
+            print("Truck", "None", end=" | ")
+            print("Status", "En route", end=" | ")
+            print("Time Picked Up:", self.loaded_time, end=" | ")
+            print("Deadline", self.deadline, end=" | ")
+            if self.delayed_time:
+                print("Delayed Time:", self.delayed_time, end=" | ")
+            print("")
+            return
+        else:
+            print("---------------"
+                  "Package Id", self.package_id, "Info"
+                                                 "------------------")
+            print("Address", self.address, end=" | ")
+            print("City", self.city, end=" | ")
+            print("Zipcode", self.zipcode, end=" | ")
+            print("Weight", self.weight_kg, end=" | ")
+            print("Truck", "None", end=" | ")
+            print("Status", "In hub", end=" | ")
+            if not self.delayed_time:
+                print("Deadline", self.deadline)
+            else:
+                print("Deadline", self.deadline, end=" | ")
+                print("Delayed Time:", self.delayed_time)
+
+
 
 
 
