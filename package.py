@@ -43,7 +43,7 @@ class Package:
     def print_info(self):
         print("---------------"
               "Package Id", self.package_id, "Info"
-                "------------------")
+                                             "------------------")
         print("Address", self.address, end=" | ")
         print("City", self.city, end=" | ")
         print("Zipcode", self.zipcode, end=" | ")
@@ -66,18 +66,26 @@ class Package:
         current_time = convert_string_time_to_int(time)
         package_delivered_time = convert_string_time_to_int(self.time_delivered)
         package_loaded_time = convert_string_time_to_int(self.loaded_time)
+        #package has been delivered
+        if self.package_id == 9:
+            if current_time <= convert_string_time_to_int("10:20 AM"):
+                self.address = "300 State St"
+                self.city = "Salt Lake City"
+                self.state = "UT"
+                self.zipcode = "84103"
         if current_time >= package_delivered_time:
             self.print_info()
             return
+        #package has been loaded but not delivered
         if package_delivered_time > current_time >= package_loaded_time:
             print("---------------"
-                      "Package Id", self.package_id, "Info"
+                  "Package Id", self.package_id, "Info"
                                                  "------------------")
             print("Address", self.address, end=" | ")
             print("City", self.city, end=" | ")
             print("Zipcode", self.zipcode, end=" | ")
             print("Weight", self.weight_kg, end=" | ")
-            print("Truck", "None", end=" | ")
+            print("Truck", self.truck, end=" | ")
             print("Status", "En route", end=" | ")
             print("Time Picked Up:", self.loaded_time, end=" | ")
             print("Deadline", self.deadline, end=" | ")
@@ -85,6 +93,7 @@ class Package:
                 print("Delayed Time:", self.delayed_time, end=" | ")
             print("")
             return
+        #package has not been loaded
         else:
             print("---------------"
                   "Package Id", self.package_id, "Info"
@@ -94,15 +103,21 @@ class Package:
             print("Zipcode", self.zipcode, end=" | ")
             print("Weight", self.weight_kg, end=" | ")
             print("Truck", "None", end=" | ")
-            print("Status", "In hub", end=" | ")
+            if self.incorrect_address:
+                if current_time <= convert_string_time_to_int("10:20 AM"):
+                    print("Status", "In hub, Incorrect Address", end = " | ")
+                else:
+                    print("Status", "In hub, correct address", end=" | ")
+            elif self.delayed_time:
+                if convert_string_time_to_int(self.delayed_time) > current_time:
+                    print("Status", "Not at hub yet", end = " | ")
+            else:
+                print("Status", "In hub", end=" | ")
             if not self.delayed_time:
                 print("Deadline", self.deadline)
             else:
                 print("Deadline", self.deadline, end=" | ")
                 print("Delayed Time:", self.delayed_time)
-
-
-
 
 
 

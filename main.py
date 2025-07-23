@@ -36,6 +36,12 @@ def main():
     ):
 
         #load packages onto truck 1
+        if convert_string_time_to_int(truck1.current_time) > convert_string_time_to_int("10:20 AM"):
+            hashtable.get(9).address = "410 S State St"
+            hashtable.get(9).city = "Salt Lake City"
+            hashtable.get(9).state = "UT"
+            hashtable.get(9).zipcode = "84111"
+
         load_packages(truck1, hashtable)
 
         truck2.current_time = "9:06 AM"
@@ -162,10 +168,10 @@ def load_packages(truck, hashtable):
             for j in range(hashtable.size):
                 for nested_package in hashtable.data[j]:
                     if (
-                    len(truck.packages_loaded) < 16
-                    and nested_package.status == "In hub"
-                    and convert_string_time_to_int(nested_package.delayed_time) <= convert_string_time_to_int(truck.current_time)
-                    and (nested_package.truck is None or nested_package.truck == truck.number)
+                            len(truck.packages_loaded) < 16
+                            and nested_package.status == "In hub"
+                            and convert_string_time_to_int(nested_package.delayed_time) <= convert_string_time_to_int(truck.current_time)
+                            and (nested_package.truck is None or nested_package.truck == truck.number)
                     ):
                         truck.add_package(nested_package)
                         if nested_package.delivered_with:
@@ -334,8 +340,3 @@ def convert_string_time_to_int(time):
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
